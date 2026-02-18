@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9matt</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root { 
+            --accent: #ff3e3e; 
+            --bg-dark: #050505;
+            --glass: rgba(0, 0, 0, 0.75);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0; padding: 0; height: 100vh;
+            background-color: var(--bg-dark);
+            background-image: url("background.jpg.jpg");
+            background-size: cover;
+            background-position: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Scanline Overlay */
+        body::before {
+            content: "";
+            position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 1; pointer-events: none;
+        }
+
+        /* Entrance Overlay */
+        #overlay {
+            position: fixed; inset: 0; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; cursor: pointer; transition: opacity 0.8s ease;
+        }
+        #overlay p { letter-spacing: 5px; font-size: 11px; text-transform: uppercase; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: absolute; top: -60px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 20px;
+        }
+        .nav-btn {
+            background: none; border: none; color: #888; font-family: 'JetBrains Mono';
+            text-transform: uppercase; font-size: 11px; letter-spacing: 2px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .nav-btn.active, .nav-btn:hover { color: var(--accent); }
+
+        /* Main Container & Slides */
+        #main-wrapper {
+            opacity: 0; transition: opacity 1.5s ease;
+            z-index: 2; width: 90%; max-width: 500px;
+            position: relative;
+        }
+
+        .slide-container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-height: 200px;
+            display: none; 
+            animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .slide-container.active { display: flex; align-items: center; gap: 30px; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-pic {
+            width: 100px; height: 100px; border-radius: 8px;
+            object-fit: cover; border: 1px solid var(--accent);
+            box-shadow: 0 0 20px rgba(255, 62, 62, 0.2);
+        }
+
+        /* The Name Title with your specific font style */
+        .name-title { 
+            font-size: 40px; 
+            font-weight: normal; 
+            line-height: 1.1; 
+            margin: 0; 
+            letter-spacing: -1px;
+            color: white;
+        }
+
+        .subtitle { display: block; font-size: 11px; letter-spacing: 2px; text-transform: lowercase; color: #888; margin: 8px 0 20px 0; }
+
+        /* Social Icons Stack */
+        .social-stack { display: flex; gap: 10px; margin-bottom: 15px; }
+        .social-item {
+            text-decoration: none; color: white; background: rgba(255, 255, 255, 0.05);
+            width: 42px; height: 42px; border-radius: 6px; transition: 0.3s; 
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+        }
+        .social-item:hover { background: rgba(255, 62, 62, 0.15); transform: translateY(-3px); border-color: var(--accent); }
+        .roblox-icon { fill: white; width: 20px; height: 20px; transition: 0.3s; }
+        .social-item:hover .roblox-icon, .social-item:hover i { color: var(--accent); fill: var(--accent); }
+
+        /* Discord Server Button */
+        .server-btn {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; color: #888; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 2px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 12px; border-radius: 6px;
+            border: 1px solid var(--border); transition: 0.3s;
+            width: fit-content;
+        }
+        .server-btn:hover { color: white; border-color: var(--accent); background: rgba(255, 62, 62, 0.05); }
+
+        /* Projects Section Specifics */
+        .projects-content { width: 100%; text-align: center; }
+        .back-btn {
+            margin-top: 30px; background: none; border: 1px solid var(--border);
+            color: #888; font-family: 'JetBrains Mono'; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; transition: 0.3s; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .back-btn:hover { border-color: var(--accent); color: white; }
+
+        /* Audio Controls */
+        #audio-controls {
+            position: fixed; bottom: 30px; right: 30px;
+            display: flex; align-items: center; gap: 15px;
+            z-index: 100; background: rgba(0,0,0,0.5);
+            padding: 10px 15px; border-radius: 30px;
+            border: 1px solid var(--border); backdrop-filter: blur(5px);
+            opacity: 0; transition: 1.5s ease;
+        }
+        #mute-btn { background: none; border: none; color: white; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .visualizer { display: flex; align-items: flex-end; gap: 2px; height: 15px; }
+        .bar { width: 3px; background: var(--accent); animation: bounce 1s infinite alternate; }
+        @keyframes bounce { 10% { height: 4px; } 100% { height: 15px; } }
+        .paused { animation-play-state: paused; height: 3px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay" onclick="start()">
+        <p>[ CLICK TO INITIALIZE ]</p>
+    </div>
+
+    <div id="main-wrapper">
+        <div class="nav-bar">
+            <button id="nav-home" class="nav-btn active" onclick="switchTab('home')">Home</button>
+            <button id="nav-projects" class="nav-btn" onclick="switchTab('projects')">Projects</button>
+        </div>
+
+        <div id="home" class="slide-container active">
+            <img src="profile.jpg.jpg" alt="9matt" class="profile-pic">
+            <div class="info">
+                <h1 class="name-title">𝟗𝒎𝒂𝒕𝒕</h1>
+                <span class="subtitle">scripter // solo developer</span>
+                
+                <div class="social-stack">
+                    <a href="https://t.me/tuffarti" target="_blank" class="social-item"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="https://www.instagram.com/tuffarti/" target="_blank" class="social-item"><i class="fa-brands fa-instagram"></i></a>
+                    <div onclick="copyDiscord()" class="social-item" style="cursor: pointer;"><i class="fa-brands fa-discord"></i></div>
+                    <a href="https://www.roblox.com/users/10963252/profile" target="_blank" class="social-item">
+                        <svg class="roblox-icon" viewBox="0 0 24 24"><path d="M18.576 13.223L14.777 17.022L10.978 13.223L14.777 9.424L18.576 13.223ZM24 12L12 0L0 12L12 24L24 12Z"/></svg>
+                    </a>
+                </div>
+
+                <a href="https://discord.gg/56C2q5PX" target="_blank" class="server-btn">
+                    <i class="fa-brands fa-discord"></i> Discord Server
+                </a>
+            </div>
+        </div>
+
+        <div id="projects" class="slide-container">
+            <div class="projects-content">
+                <h1 class="name-title">𝑷𝒓𝒐𝒋𝒆𝒄𝒕𝒔</h1>
+                <p style="color: #555; font-size: 11px; margin-top: 10px;">Module development and UI scripting in progress...</p>
+                
+                <button class="back-btn" onclick="switchTab('home')">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="audio-controls">
+        <div class="visualizer" id="viz">
+            <div class="bar"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar" style="animation-delay:0.4s"></div>
+        </div>
+        <button id="mute-btn" onclick="toggleMute()"><i id="mute-icon" class="fa-solid fa-volume-high"></i></button>
+    </div>
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="music.mp3.mp3" type="audio/mpeg">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const audio = document.getElementById("bgMusic");
+        const muteIcon = document.getElementById("mute-icon");
+        const bars = document.querySelectorAll(".bar");
+
+        function start() {
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio Error"));
+            document.getElementById("overlay").style.opacity = "0";
+            document.getElementById("overlay").style.pointerEvents = "none";
+            document.getElementById("main-wrapper").style.opacity = "1";
+            document.getElementById("audio-controls").style.opacity = "1";
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.slide-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            if(tabId === 'home') document.getElementById('nav-home').classList.add('active');
+            if(tabId === 'projects') document.getElementById('nav-projects').classList.add('active');
+        }
+
+        function toggleMute() {
+            if (audio.muted) {
+                audio.muted = false;
+                muteIcon.className = "fa-solid fa-volume-high";
+                bars.forEach(b => b.classList.remove("paused"));
+            } else {
+                audio.muted = true;
+                muteIcon.className = "fa-solid fa-volume-xmark";
+                bars.forEach(b => b.classList.add("paused"));
+            }
+        }
+
+        function copyDiscord() {
+            navigator.clipboard.writeText("9matt");
+            alert("Discord copied: 9matt");
+        }
+    </script>
+</body>
+</html>
